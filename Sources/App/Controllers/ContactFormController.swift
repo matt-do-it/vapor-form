@@ -5,10 +5,16 @@ struct ContactFormController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let contact = routes.grouped("api", "contact")
         
-        contact.post(use: index)
+        contact.get(use: preFlight)
+        contact.post(use: post)
      }
 
-    @Sendable func index(req: Request) async throws -> Response {
+    @Sendable func preFlight(req: Request) async throws -> Response {
+        let response = Response(status: .ok)
+        return response
+    }
+    
+    @Sendable func post(req: Request) async throws -> Response {
         try ContactFormRequest.validate(content: req)
         
         let contact = try req.content.decode(ContactFormRequest.self)
