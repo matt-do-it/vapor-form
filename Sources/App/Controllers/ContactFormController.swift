@@ -5,11 +5,11 @@ struct ContactFormController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let contact = routes.grouped("api", "contact")
         
-        contact.get(use: preFlight)
+        contact.get(use: index)
         contact.post(use: post)
      }
 
-    @Sendable func preFlight(req: Request) async throws -> Response {
+    @Sendable func index(req: Request) async throws -> Response {
         let response = Response(status: .ok)
         return response
     }
