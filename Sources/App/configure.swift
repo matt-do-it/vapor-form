@@ -1,9 +1,15 @@
 import Vapor
+import Smtp
 
-// configures your application
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-    // register routes
+    app.smtp.configuration.hostname = Environment.get("SMTP_HOST")!
+    app.smtp.configuration.port = Int(Environment.get("SMTP_PORT")!)!
+    app.smtp.configuration.signInMethod = .credentials(
+        username: Environment.get("SMTP_USER")!,
+        password: Environment.get("SMTP_PASSWORD")!
+    )
+    app.smtp.configuration.secure = .startTls
+    
     try routes(app)
 }
+
