@@ -10,7 +10,6 @@ public func configure(_ app: Application) async throws {
     )
     app.smtp.configuration.secure = .startTls
     
-    
     let corsConfiguration = CORSMiddleware.Configuration(
         allowedOrigin: .all,
         allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],

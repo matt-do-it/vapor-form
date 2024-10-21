@@ -7,6 +7,7 @@ FROM swift:6.0-jammy AS build
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
+    && apt-get install -y iputils-ping \
     && apt-get install -y libjemalloc-dev
 
 # Set up a build area
