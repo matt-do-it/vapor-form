@@ -1,5 +1,7 @@
 import Vapor
 import Smtp
+import Fluent
+import FluentPostgresDriver
 
 public func configure(_ app: Application) async throws {
     app.smtp.configuration.hostname = Environment.get("SMTP_HOST")!
@@ -9,6 +11,26 @@ public func configure(_ app: Application) async throws {
         password: Environment.get("SMTP_PASSWORD")!
     )
     app.smtp.configuration.secure = .startTls
+    
+    var configuration = TLSConfiguration.makeClientConfiguration()
+    configuration.certificateVerification = .none
+    
+    app.databases.use(
+        .postgres(
+            configuration: .init(
+                hostname: Environment.get("PG_HOST")!,
+                port: Int(Environment.get("PG_PORT")!)!,
+                username: Environment.get("PG_USER")!,
+                password: Environment.get("PG_PASSWORD")!,
+                database: Environment.get("PG_DATABASE")!,
+                tls: .require(try NIOSSLContext(configuration: configuration))
+            )
+        ),
+        as: .psql
+    )
+    
+    app.migrations.add(ContactFormMigration())
+    try await app.autoMigrate()
     
     let corsConfiguration = CORSMiddleware.Configuration(
         allowedOrigin: .all,

@@ -11,12 +11,13 @@ struct AppTests {
         try await app.asyncShutdown()
     }
     
-    @Test("Test Hello World Route")
-    func helloWorld() async throws {
+    @Test("Test contact API")
+    func testContact() async throws {
         try await withApp { app in
-            try await app.test(.GET, "hello", afterResponse: { res async in
+            try await app.test(.POST, "api/contact", beforeRequest: { req in
+                try req.content.encode(["name": "Matt", "email": "info@test.de", "message": "Test"])
+            }, afterResponse: { res async in
                 #expect(res.status == .ok)
-                #expect(res.body.string == "Hello, world!")
             })
         }
     }
