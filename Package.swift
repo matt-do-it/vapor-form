@@ -12,8 +12,8 @@ let package = Package(
         // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         .package(url: "https://github.com/Mikroservices/Smtp.git", from: "3.0.0"),
-        .package(url: "https://github.com/groue/GRMustache.swift", from: "5.0.0"),
-        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
+        .package(url: "https://github.com/hummingbird-project/swift-mustache", from: "2.0.0-beta.1"),
+            .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0"),
         .package(url: "https://github.com/grpc/grpc-swift.git", from: "1.24.2")
     ],
@@ -27,7 +27,7 @@ let package = Package(
                 .product(name: "Smtp", package: "Smtp"),
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
-                .product(name: "Mustache", package: "GRMustache.swift"),
+                .product(name: "Mustache", package: "swift-mustache"),
                 .product(name: "GRPC", package: "grpc-swift")
             ],
             swiftSettings: swiftSettings

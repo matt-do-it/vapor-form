@@ -1,7 +1,7 @@
 import Vapor
 import Smtp
-import Mustache
 import GRPC
+import Mustache
 
 struct ContactFormController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -24,8 +24,8 @@ struct ContactFormController: RouteCollection {
         let templateBuffer = try await req.fileio.collectFile(at: "Templates/ContactForm.mustache")
         let templateString = String(buffer: templateBuffer)
         
-        let template = try Mustache.Template(string: templateString)
-        let rendered = try template.render(contact)
+        let template = try Mustache.MustacheTemplate(string: templateString)
+        let rendered = template.render(contact)
         
         // Safe to database
         let model = ContactFormModel(request: contact)

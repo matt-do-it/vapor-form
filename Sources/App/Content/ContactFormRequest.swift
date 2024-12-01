@@ -1,5 +1,4 @@
 import Vapor
-import Mustache
 
 struct ContactFormRequest: Content {
     var name: String
@@ -15,12 +14,3 @@ extension ContactFormRequest: Validatable {
         validations.add("message", as: String.self, is: !.empty)
     }
 }
-
-extension ContactFormRequest: MustacheBoxable {
-    var mustacheBox: Mustache.MustacheBox {
-        return Box(["name": self.name,
-                    "email": self.email,
-                    "message": self.message])
-    }
-}
-
