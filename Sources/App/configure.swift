@@ -30,7 +30,9 @@ public func configure(_ app: Application) async throws {
     )
     
     app.migrations.add(ContactFormMigration())
-    try await app.autoMigrate()
+    app.migrations.add(UserModelMigration())
+    
+   try await app.autoMigrate()
     
     let corsConfiguration = CORSMiddleware.Configuration(
         allowedOrigin: .all,

@@ -4,6 +4,12 @@ struct ContactFormRequest: Content {
     var name: String
     var email: String
     var message: String
+    
+    init(model: ContactFormModel) {
+        self.name = model.name
+        self.email = model.email
+        self.message = model.message
+    }
 }
 
 extension ContactFormRequest: Validatable {
@@ -14,3 +20,4 @@ extension ContactFormRequest: Validatable {
         validations.add("message", as: String.self, is: !.empty)
     }
 }
+
