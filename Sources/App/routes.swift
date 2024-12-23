@@ -1,31 +1,12 @@
 import Vapor
 
 func routes(_ app: Application) throws {
-    try app.register(collection: ContactFormController())
+    try app.register(collection: LoginController())
     
-    let protected = app.grouped(AuthDialogMiddleware())
+    try app.register(collection: ContactFormController())
 
-        .grouped(UserModel.authenticator())
-        .grouped(UserModel.guardMiddleware())
+    let protected = app
+        .grouped(AuthPayload.authenticator(), AuthPayload.guardMiddleware())
     
     try protected.register(collection: ContactFormAdminController())
  }
-
-struct AuthDialogMiddleware: Middleware {
-    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
-        return next.respond(to: request).flatMapErrorThrowing { error in
-            switch error {
-            case let abort as AbortError:
-                guard abort.status == .unauthorized else {
-                    throw error
-                }
-
-                let response = Response(status: .unauthorized, headers: [:])
-                response.headers.replaceOrAdd(name: "WWW-Authenticate", value: "Basic realm=\"Dev\"")
-                return response
-            default:
-                throw error
-            }
-        }
-    }
-}

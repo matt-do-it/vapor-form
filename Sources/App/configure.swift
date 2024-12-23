@@ -41,6 +41,8 @@ public func configure(_ app: Application) async throws {
     )
     app.middleware.use(CORSMiddleware(configuration: corsConfiguration))
 
+    await app.jwt.keys.add(hmac: "secret", digestAlgorithm: .sha256)
+    
     try routes(app)
   }
 

@@ -10,6 +10,12 @@ struct ContactFormRequest: Content {
         self.email = model.email
         self.message = model.message
     }
+    
+    func updateModel(model: ContactFormModel) {
+        model.name = self.name
+        model.email = self.email
+        model.message = self.message
+    }
 }
 
 extension ContactFormRequest: Validatable {

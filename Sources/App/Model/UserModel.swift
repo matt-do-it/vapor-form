@@ -8,7 +8,7 @@
 import Fluent
 import Vapor
 
-final class UserModel: Model, Content {
+final class UserModel: Model {
     static let schema = "users"
 
     @ID(key: .id)
