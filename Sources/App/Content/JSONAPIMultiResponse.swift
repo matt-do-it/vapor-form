@@ -7,5 +7,6 @@
 import Vapor
 
 struct JSONAPIMultiResponse<T> : Content where T : Content {
+    var links : JSONAPILinksResponse
     var data : [JSONAPIObject<T>]
 }

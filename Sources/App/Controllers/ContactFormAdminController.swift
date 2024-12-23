@@ -2,6 +2,7 @@ import Vapor
 import Smtp
 import GRPC
 import Mustache
+import FluentKit
 
 struct ContactFormAdminController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
@@ -13,6 +14,8 @@ struct ContactFormAdminController: RouteCollection {
     
     @Sendable func index(req: Request) async throws -> JSONAPIMultiResponse<ContactFormRequest> {
         let model = try await ContactFormModel.query(on: req.db)
+            .sort(\ContactFormModel.$createdAt, .descending)
+            .sort(\ContactFormModel.$id)
             .all()
         
         let data = model.map { t in
@@ -20,7 +23,17 @@ struct ContactFormAdminController: RouteCollection {
                           id: t.id!,
                           attributes: ContactFormRequest(model: t))
         }
-        return JSONAPIMultiResponse(data: data)
+        
+        
+        var urlComponents = URLComponents(string: req.application.hostName)!
+        urlComponents.path = "/api/admin/contacts"
+        
+        let url = urlComponents.url!
+        
+        return JSONAPIMultiResponse(
+            links: JSONAPILinksResponse(selfLink: url),
+            data: data
+        )
     }
     
     @Sendable func get(req: Request) async throws -> JSONAPISingleResponse<ContactFormRequest> {
