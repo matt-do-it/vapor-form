@@ -33,7 +33,9 @@ struct LoginController: RouteCollection {
             expiration: .init(value: .distantFuture)
         )
         
-        return try await ["user" : user.email, "token": req.jwt.sign(payload)]
+        return try await ["user" : user.email,
+                          "name": user.name,
+                          "token": req.jwt.sign(payload)]
     }
     
     @Sendable func verify(req: Request) async throws -> [String: String] {
@@ -48,6 +50,7 @@ struct LoginController: RouteCollection {
             throw Abort(.unauthorized)
         }
         
-        return ["user" : user.email]
+        return ["user" : user.email,
+                "name": user.name]
     }
 }
