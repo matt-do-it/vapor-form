@@ -21,4 +21,18 @@ struct AppTests {
             })
         }
     }
+    
+    @Test("Test contact API")
+    func testContactSampleData() async throws {
+        try await withApp { app in
+            for i in stride(from: 0, to: 100, by: 1) {
+                try await app.test(.POST, "api/contact", beforeRequest: { req in
+                    try req.content.encode(["name": "Matt " + String(i), "email": "info@test.de", "message": "Test"])
+                }, afterResponse: { res async in
+                    #expect(res.status == .ok)
+                })
+            }
+        }
+    }
+
 }

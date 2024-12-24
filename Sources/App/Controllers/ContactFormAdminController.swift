@@ -13,26 +13,96 @@ struct ContactFormAdminController: RouteCollection {
     }
     
     @Sendable func index(req: Request) async throws -> JSONAPIMultiResponse<ContactFormRequest> {
-        let model = try await ContactFormModel.query(on: req.db)
+        
+        let params = try req.query.decode(JSONQueryParams.self)
+        
+        let query = ContactFormModel.query(on: req.db)
             .sort(\ContactFormModel.$createdAt, .descending)
             .sort(\ContactFormModel.$id)
+        
+        
+        let offset = params.page?.offset ?? 0
+        let limit = max(min(params.page?.limit ?? 10, 1000), 1)
+        
+        let modelData = try await query
+            .offset(offset)
+            .limit(limit)
             .all()
         
-        let data = model.map { t in
+        let data = modelData.map { t in
             JSONAPIObject(type: "contact",
                           id: t.id!,
                           attributes: ContactFormRequest(model: t))
         }
         
         
-        var urlComponents = URLComponents(string: req.application.hostName)!
-        urlComponents.path = "/api/admin/contacts"
+        let count = try await ContactFormModel.query(on: req.db)
+            .count()
         
-        let url = urlComponents.url!
+        var selfLinkComponents = URLComponents(string: req.application.hostName)!
+        selfLinkComponents.path = "/api/admin/contacts"
+        selfLinkComponents.queryItems = [
+            URLQueryItem(name: "page[offset]", value: String(offset)),
+            URLQueryItem(name: "page[limit]", value: String(limit))
+        ]
+        let selfLink = selfLinkComponents.url!
+
+        var firstLinkComponents = URLComponents(string: req.application.hostName)!
+        firstLinkComponents.path = "/api/admin/contacts"
+        let firstOffset = 0
+        firstLinkComponents.queryItems = [
+            URLQueryItem(name: "page[offset]", value: String(firstOffset)),
+            URLQueryItem(name: "page[limit]", value: String(limit))
+        ]
+        let firstLink = firstLinkComponents.url!
+
+        var lastLinkComponents = URLComponents(string: req.application.hostName)!
+        lastLinkComponents.path = "/api/admin/contacts"
+        
+        let lastOffset = count - (count % limit)
+        
+        lastLinkComponents.queryItems = [
+            URLQueryItem(name: "page[offset]", value: String(lastOffset)),
+            URLQueryItem(name: "page[limit]", value: String(limit))
+        ]
+        let lastLink = lastLinkComponents.url!
+
+        let nextLink : URL? = {
+            if (offset + limit < count) {
+                var nextLinkComponents = URLComponents(string: req.application.hostName)!
+                nextLinkComponents.path = "/api/admin/contacts"
+                nextLinkComponents.queryItems = [
+                    URLQueryItem(name: "page[offset]", value: String(offset + limit)),
+                    URLQueryItem(name: "page[limit]", value: String(limit))
+                ]
+                return nextLinkComponents.url
+            } else {
+                return nil
+            }
+        }()
+        let prevLink : URL? = {
+            if (offset - limit >= 0) {
+                var prevLinkComponents = URLComponents(string: req.application.hostName)!
+                prevLinkComponents.path = "/api/admin/contacts"
+                prevLinkComponents.queryItems = [
+                    URLQueryItem(name: "page[offset]", value: String(offset - limit)),
+                    URLQueryItem(name: "page[limit]", value: String(limit))
+                ]
+                return prevLinkComponents.url
+            } else {
+                return nil
+            }
+        }()
+
         
         return JSONAPIMultiResponse(
-            links: JSONAPILinksResponse(selfLink: url),
-            data: data
+            links: JSONAPILinksResponse(selfLink: selfLink,
+                                        first: firstLink,
+                                        last: lastLink,
+                                        prev: prevLink,
+                                        next: nextLink),
+            data: data,
+            meta: JSONAPIMetaResponse(total: count)
         )
     }
     
