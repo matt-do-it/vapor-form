@@ -49,7 +49,7 @@ public func configure(_ app: Application) async throws {
 extension Application {
     var hostName : String {
         get {
-            return "http://api.mattherold.de"
+            return "https://api.mattherold.de"
         }
     }
 }
