@@ -26,6 +26,6 @@ struct SampleSubmissionCommand: AsyncCommand {
             try! pubSubClient.close()
         }
         
-        try await pubSubClient.sendMessage()
+        try await pubSubClient.sendMessage(contact: ContactFormDTO(name: "Matt", email: "mattherold@icloud.com", message: "Hey"))
     }
 }

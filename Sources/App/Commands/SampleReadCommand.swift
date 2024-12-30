@@ -19,10 +19,21 @@ struct SampleReadCommand: AsyncCommand {
             try! pubSubClient.close()
         }
         
-        for try await random in pubSubClient.readMessages() {
-            print(random)
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+        
+        let messages = try await pubSubClient.readMessages(maxMessages: 10)
+        for random in messages {
+            do {
+                let message = try jsonDecoder.decode(ContactFormDTO.self, from: random.message.data)
+                print(message)
+            } catch {
+                print("error on decode")
+            }
         }
         
+        try await pubSubClient.acknowledgeMessages(messages: messages)
+
         print("Streaming-Pull abgeschlossen.")
     }
 }

@@ -39,25 +39,12 @@ struct ContactFormController: RouteCollection {
         )
         
         try await req.application.smtp.send(email, eventLoop: nil)
-        /*
-        let channel = try GRPCChannelPool.with(
-            target: .host("localhost", port: self.port),
-            transportSecurity: .plaintext,
-            eventLoopGroup: req.application.eventLoopGroup
-          )
-        defer {
-              try! channel.close().wait()
-            }
         
-        var publishRequest = Google_Pubsub_V1_PublishRequest()
-        publishRequest.topic = "contact"
+        let form = ContactFormDTO(name: contact.name, email: contact.email, message: contact.message)
         
-        var message = Google_Pubsub_V1_PubsubMessage()
-        message.data = contact.post.data
+        let client = try await PubSubClient(eventLoopGroup: req.application.eventLoopGroup)
+        try await client.sendMessage(contact: form)
         
-        let client = Google_Pubsub_V1_PublisherClient(channel: channel)
-        client.publish(req: .init(topic: "contact-form", messages: [.init(data: contact.post.data)]))
-        */
         let response = Response(status: .ok)
         return response
     }

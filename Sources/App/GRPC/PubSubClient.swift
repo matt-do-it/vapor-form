@@ -73,22 +73,24 @@ class PubSubClient {
         return try await client.listTopics(request, callOptions: callOptions())
     }
     
-    func sendMessage() async throws {
+    func sendMessage(contact: ContactFormDTO) async throws {
         let client = Google_Pubsub_V1_PublisherAsyncClient(channel: channel)
-        
         
         var publishRequest = Google_Pubsub_V1_PublishRequest()
         publishRequest.topic = Environment.get("PUBSUB_TOPIC")!
         
         var message = Google_Pubsub_V1_PubsubMessage()
-        message.data = "SAMPLE".data(using: .utf8)!
+        
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        message.data = try encoder.encode(contact)
         
         publishRequest.messages = [message]
         
         let _ = try await client.publish(publishRequest, callOptions: callOptions())
     }
     
-    func readMessages() -> AsyncThrowingStream<Google_Pubsub_V1_ReceivedMessage, Error> {
+    func readMessagesStream() -> AsyncThrowingStream<Google_Pubsub_V1_ReceivedMessage, Error> {
         return AsyncThrowingStream { continuation in
             Task {
                 let client = Google_Pubsub_V1_SubscriberAsyncClient(channel: channel)
@@ -127,6 +129,30 @@ class PubSubClient {
                 let _ = await call.status
                 continuation.finish() // Signal the end of the sequence
             }
+        }
+    }
+    
+    func readMessages(maxMessages: Int32) async throws -> [Google_Pubsub_V1_ReceivedMessage] {
+        let client = Google_Pubsub_V1_SubscriberAsyncClient(channel: channel)
+        
+        var p = Google_Pubsub_V1_PullRequest()
+        p.subscription = Environment.get("PUBSUB_SUBSCRIPTION")!
+        p.maxMessages = maxMessages
+        
+        let call = try await client.pull(p, callOptions: callOptions())
+        
+        return call.receivedMessages
+    }
+    
+    func acknowledgeMessages(messages: [Google_Pubsub_V1_ReceivedMessage]) async throws {
+        if (messages.count > 0) {
+            let client = Google_Pubsub_V1_SubscriberAsyncClient(channel: channel)
+            
+            var p = Google_Pubsub_V1_AcknowledgeRequest()
+            p.subscription = Environment.get("PUBSUB_SUBSCRIPTION")!
+            p.ackIds = messages.map(\.ackID)
+            
+            let _ = try await client.acknowledge(p, callOptions: callOptions())
         }
     }
 }
