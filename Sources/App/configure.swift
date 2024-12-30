@@ -40,6 +40,10 @@ public func configure(_ app: Application) async throws {
         allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
     )
     app.middleware.use(CORSMiddleware(configuration: corsConfiguration))
+    
+    app.asyncCommands.use(ShowTopicsCommand(), as: "show-topics")
+    app.asyncCommands.use(SampleSubmissionCommand(), as: "send-message")
+    app.asyncCommands.use(SampleReadCommand(), as: "read-message")
 
     await app.jwt.keys.add(hmac: "secret", digestAlgorithm: .sha256)
     

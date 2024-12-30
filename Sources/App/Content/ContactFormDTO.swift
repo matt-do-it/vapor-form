@@ -16,7 +16,14 @@ struct ContactFormDTO: Content {
         case updatedAt = "updated-at"
     }
 
-    
+    init(name: String, email: String, message: String) {
+        self.name = name
+        self.email = email
+        self.message = message
+        self.createdAt = Date.now
+        self.updatedAt = Date.now
+    }
+
     init(model: ContactFormModel) {
         self.name = model.name
         self.email = model.email
