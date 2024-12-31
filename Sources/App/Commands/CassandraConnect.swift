@@ -22,7 +22,7 @@ struct CassandraConnectCommand: AsyncCommand {
             )
         
         var hpackHeaders = HPACKHeaders()
-        hpackHeaders.add(name: "X-Cassandra-Token", value: "AstraCS:eyMhzdIkluucJNIfiepKcRER:22a58d00758057f3d633e75ca63bd198c269cbae8ee8ecacea973f6bd7153d38")
+        hpackHeaders.add(name: "X-Cassandra-Token", value: "")
         
         let callOptions = CallOptions(customMetadata: hpackHeaders)
         
