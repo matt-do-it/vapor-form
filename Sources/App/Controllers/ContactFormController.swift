@@ -42,12 +42,8 @@ struct ContactFormController: RouteCollection {
         
         let form = ContactFormDTO(name: contact.name, email: contact.email, message: contact.message)
         
-        do {
-            let client = try await PubSubClient(eventLoopGroup: req.application.eventLoopGroup)
-            try await client.sendMessage(contact: form)
-        } catch {
-            print("Got error \(error)")
-        }
+        let client = try await PubSubClient(eventLoopGroup: req.application.eventLoopGroup)
+        try await client.sendMessage(contact: form)
         
         let response = Response(status: .ok)
         return response
