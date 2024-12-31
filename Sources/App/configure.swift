@@ -44,6 +44,7 @@ public func configure(_ app: Application) async throws {
     app.asyncCommands.use(ShowTopicsCommand(), as: "show-topics")
     app.asyncCommands.use(SampleSubmissionCommand(), as: "send-message")
     app.asyncCommands.use(SampleReadCommand(), as: "read-message")
+    app.asyncCommands.use(CassandraConnectCommand(), as: "cassandra-connect")
 
     await app.jwt.keys.add(hmac: "secret", digestAlgorithm: .sha256)
     
