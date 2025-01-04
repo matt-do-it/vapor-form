@@ -16,13 +16,45 @@ struct ContactFormAdminController: RouteCollection {
         
         let params = try req.query.decode(JSONQueryParams.self)
         
-        let query = ContactFormModel.query(on: req.db)
-            .sort(\ContactFormModel.$createdAt, .descending)
+        var query = ContactFormModel.query(on: req.db)
+
+        if let filter = params.filter, !filter.isEmpty {
+            query = query.group(.or) { group in
+                group.filter(\.$name ~~ filter)
+                    .filter(\.$email ~~ filter)
+                    .filter(\.$message ~~ filter)
+            }
+        }
+        
+        if let sort = params.sort, !sort.isEmpty {
+            var valuePath = sort
+            var direction : DatabaseQuery.Sort.Direction = .ascending
+            
+            if sort.first == "-" {
+                valuePath = String(sort.dropFirst(1))
+                direction = .descending
+            }
+            if (valuePath == "email") {
+                query = query.sort(\.$email, direction)
+            }
+            if (valuePath == "name") {
+                query = query.sort(\.$name, direction)
+            }
+            if (valuePath == "message") {
+                query = query.sort(\.$message, direction)
+            }
+            if (valuePath == "createdAt") {
+                query = query.sort(\.$createdAt, direction)
+            }
+        }
+        query = query.sort(\ContactFormModel.$createdAt, .descending)
             .sort(\ContactFormModel.$id)
+        
         
         
         let offset = params.page?.offset ?? 0
         let limit = max(min(params.page?.limit ?? 10, 1000), 1)
+        
         
         let modelData = try await query
             .offset(offset)
