@@ -6,10 +6,16 @@ import FluentKit
 
 struct ContactFormAdminController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let contact = routes.grouped("api", "admin", "contacts")
+        let contacts = routes.grouped("api", "admin", "contacts")
         
-        contact.get(use: index)
-        contact.get(":id", use: get)
+        contacts.post(use: create)
+        contacts.get(use: index)
+
+        contacts.group(":id") { contact in
+            contact.get(use: get)
+            contact.patch(use: update)
+            contact.delete(use: delete)
+         }
     }
     
     @Sendable func index(req: Request) async throws -> JSONAPIMultiResponse<ContactFormDTO> {
@@ -175,7 +181,7 @@ struct ContactFormAdminController: RouteCollection {
         return .ok
     }
     
-    func update(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
+    @Sendable  func update(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
         guard let id = req.parameters.get("id") else {
             throw Abort(.preconditionFailed)
         }
@@ -201,7 +207,7 @@ struct ContactFormAdminController: RouteCollection {
         return JSONAPISingleResponse(data: data)
     }
 
-    func create(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
+    @Sendable func create(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
         let model = ContactFormModel()
         
         let createRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTO>.self)
@@ -217,5 +223,5 @@ struct ContactFormAdminController: RouteCollection {
         
         return JSONAPISingleResponse(data: data)
     }
-
-}
+    
+ }
