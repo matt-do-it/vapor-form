@@ -5,8 +5,8 @@ struct ContactFormDTO: Content {
     var email: String
     var message: String
     
-    var createdAt : Date
-    var updatedAt : Date
+    var createdAt : Date?
+    var updatedAt : Date?
     
     enum CodingKeys: String, CodingKey {
         case name
@@ -36,8 +36,6 @@ struct ContactFormDTO: Content {
         model.name = self.name
         model.email = self.email
         model.message = self.message
-        model.createdAt = self.createdAt
-        model.updatedAt = self.updatedAt
-    }
+     }
 }
 

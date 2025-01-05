@@ -19,7 +19,6 @@ struct ContactFormAdminController: RouteCollection {
     }
     
     @Sendable func index(req: Request) async throws -> JSONAPIMultiResponse<ContactFormDTO> {
-        
         let params = try req.query.decode(JSONQueryParams.self)
         
         var query = ContactFormModel.query(on: req.db)
@@ -196,7 +195,8 @@ struct ContactFormAdminController: RouteCollection {
         let updateRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTO>.self)
         
         updateRequest.data.attributes.updateModel(model: model)
-        
+        model.updatedAt = Date.now
+
         try await model.save(on: req.db)
         
         let data = JSONAPIObject(type: "contact",
@@ -213,7 +213,9 @@ struct ContactFormAdminController: RouteCollection {
         let createRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTO>.self)
         
         createRequest.data.attributes.updateModel(model: model)
-
+        model.createdAt = Date.now
+        model.updatedAt = Date.now
+        
         try await model.save(on: req.db)
         
         let data = JSONAPIObject(type: "contact",
