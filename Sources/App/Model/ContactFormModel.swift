@@ -34,3 +34,33 @@ final class ContactFormModel: Model {
         self.updatedAt = Date()
     }
 }
+
+protocol JSONAPIConvertible {
+    associatedtype Attributes : JSONAPIAttributes
+    associatedtype Relationships : JSONAPIRelationship
+        
+    func jsonAPIObject() -> JSONAPIObject<Attributes, Relationships>
+    func update(jsonAPIObject: JSONAPIObject<Attributes, Relationships>)
+}
+
+extension ContactFormModel : JSONAPIConvertible {
+    typealias Attributes = ContactFormDTOAttributes
+    typealias Relationship = ContactFormDTORelationship
+
+    func jsonAPIObject() -> JSONAPIObject<ContactFormDTOAttributes, ContactFormDTORelationship> {
+        return JSONAPIObject(type: "contact", id: self.id!, attributes: ContactFormDTOAttributes(name: self.name,
+                                                                                              email: self.email,
+                                                                                              message: self.message,
+                                                                                              createdAt: self.createdAt,
+                                                                                              updatedAt: self.updatedAt),
+                             relationships: ContactFormDTORelationship(form: nil))
+    }
+    
+    func update(jsonAPIObject: JSONAPIObject<ContactFormDTOAttributes, ContactFormDTORelationship>) {
+        let attributes = jsonAPIObject.attributes
+        
+        self.name = attributes.name
+        self.email = attributes.email
+        self.message = attributes.message
+    }
+}

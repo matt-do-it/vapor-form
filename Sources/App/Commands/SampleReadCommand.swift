@@ -25,7 +25,7 @@ struct SampleReadCommand: AsyncCommand {
         let messages = try await pubSubClient.readMessages(maxMessages: 10)
         for random in messages {
             do {
-                let message = try jsonDecoder.decode(ContactFormDTO.self, from: random.message.data)
+                let message = try jsonDecoder.decode(ContactFormDTOAttributes.self, from: random.message.data)
                 print(message)
             } catch {
                 print("error on decode")

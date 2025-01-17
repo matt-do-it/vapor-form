@@ -40,7 +40,7 @@ struct ContactFormController: RouteCollection {
         
         try await req.application.smtp.send(email, eventLoop: nil)
         
-        let form = ContactFormDTO(name: contact.name, email: contact.email, message: contact.message)
+        let form = ContactFormDTOAttributes(name: contact.name, email: contact.email, message: contact.message)
         
         let client = try await PubSubClient(eventLoopGroup: req.application.eventLoopGroup)
         try await client.sendMessage(contact: form)

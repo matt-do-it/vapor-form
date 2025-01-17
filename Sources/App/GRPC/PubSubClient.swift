@@ -73,7 +73,7 @@ class PubSubClient {
         return try await client.listTopics(request, callOptions: callOptions())
     }
     
-    func sendMessage(contact: ContactFormDTO) async throws {
+    func sendMessage(contact: ContactFormDTOAttributes) async throws {
         let client = Google_Pubsub_V1_PublisherAsyncClient(channel: channel)
         
         var publishRequest = Google_Pubsub_V1_PublishRequest()

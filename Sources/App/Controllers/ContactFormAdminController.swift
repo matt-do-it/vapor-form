@@ -18,7 +18,7 @@ struct ContactFormAdminController: RouteCollection {
          }
     }
     
-    @Sendable func index(req: Request) async throws -> JSONAPIMultiResponse<ContactFormDTO> {
+    @Sendable func index(req: Request) async throws -> JSONAPIMultiResponse<ContactFormDTOAttributes, ContactFormDTORelationship> {
         let params = try req.query.decode(JSONQueryParams.self)
         
         var query = ContactFormModel.query(on: req.db)
@@ -67,9 +67,7 @@ struct ContactFormAdminController: RouteCollection {
             .all()
         
         let data = modelData.map { t in
-            JSONAPIObject(type: "contact",
-                          id: t.id!,
-                          attributes: ContactFormDTO(model: t))
+            t.jsonAPIObject()
         }
         
         
@@ -143,7 +141,7 @@ struct ContactFormAdminController: RouteCollection {
         )
     }
     
-    @Sendable func get(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
+    @Sendable func get(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTOAttributes, ContactFormDTORelationship> {
         guard let id = req.parameters.get("id") else {
             throw Abort(.preconditionFailed)
         }
@@ -155,9 +153,7 @@ struct ContactFormAdminController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        let data = JSONAPIObject(type: "contact",
-                                 id: model.id!,
-                                 attributes: ContactFormDTO(model: model))
+        let data = model.jsonAPIObject()
         
         
         return JSONAPISingleResponse(data: data)
@@ -180,7 +176,7 @@ struct ContactFormAdminController: RouteCollection {
         return .ok
     }
     
-    @Sendable  func update(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
+    @Sendable  func update(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTOAttributes, ContactFormDTORelationship> {
         guard let id = req.parameters.get("id") else {
             throw Abort(.preconditionFailed)
         }
@@ -192,35 +188,31 @@ struct ContactFormAdminController: RouteCollection {
             throw Abort(.notFound)
         }
         
-        let updateRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTO>.self)
+        let updateRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTOAttributes, ContactFormDTORelationship>.self)
         
-        updateRequest.data.attributes.updateModel(model: model)
+        model.update(jsonAPIObject: updateRequest.data)
         model.updatedAt = Date.now
 
         try await model.save(on: req.db)
         
-        let data = JSONAPIObject(type: "contact",
-                                 id: model.id!,
-                                 attributes: ContactFormDTO(model: model))
+        let data = model.jsonAPIObject()
         
         
         return JSONAPISingleResponse(data: data)
     }
 
-    @Sendable func create(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTO> {
+    @Sendable func create(req: Request) async throws -> JSONAPISingleResponse<ContactFormDTOAttributes, ContactFormDTORelationship> {
         let model = ContactFormModel()
         
-        let createRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTO>.self)
+        let createRequest = try req.content.decode(JSONAPISingleRequest<ContactFormDTOAttributes, ContactFormDTORelationship>.self)
         
-        createRequest.data.attributes.updateModel(model: model)
+        model.update(jsonAPIObject: createRequest.data)
         model.createdAt = Date.now
         model.updatedAt = Date.now
         
         try await model.save(on: req.db)
         
-        let data = JSONAPIObject(type: "contact",
-                                 id: model.id!,
-                                 attributes: ContactFormDTO(model: model))
+        let data = model.jsonAPIObject()
         
         
         return JSONAPISingleResponse(data: data)
